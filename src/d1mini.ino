@@ -161,9 +161,6 @@ class CaptiveRequestHandler : public AsyncWebHandler {
     }
 };
 
-
-
-
 void startCaptiveWebServer()
 {
   WiFi.disconnect();
@@ -177,6 +174,7 @@ void startCaptiveWebServer()
   // brightness
   update_ledmatrix_command_with_arg('B', "1");
   update_ledmatrix_ipaddress("192.168.4.1");
+  update_ledmatrix_command("+");
 }
 
 void startWebServer()
@@ -362,6 +360,7 @@ void send_bootcommand(const String& ipaddress) {
     debug_print("IP Address: ");
     debug_println(ipaddress);
     update_ledmatrix_ipaddress(ipaddress);
+    update_ledmatrix_command("+");
   }
 
   else {
