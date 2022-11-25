@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Brian's Petrol Signs Setup Page</title>
+	<meta name="description" content="">
+  	<meta name="viewport" content="width=device-width, initial-scale=1">
+  	<style>
+  		body {
+  			background-color: #BDBDBD;
+
+  		}
+
+  		section {
+  			max-width: 500px;
+  			margin: 3rem auto;
+  			background: #eceff1;
+            padding: 0 0 1rem; 
+  		}
+
+        button {
+    padding: 0.75rem 1.5rem;
+    margin: 0.5rem 0 0;
+    outline: 0;
+    border: 0;
+    background: #2196f3;
+    border-radius: 4px;
+    color: #FFF;
+    font-weight: 700;
+    font-size: .875rem;
+    letter-spacing: .25px;
+    transition: background .3s ease;        	
+    box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3); /* black with 30% opacity */
+        }
+
+  		.form-header {
+background: #fff;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 600;
+    color: #212121;
+    padding: 1rem;
+    margin: 0 0 1rem;
+    position: relative;  			
+  		}
+
+   .form-group {
+margin: 0 2rem 1rem;   	
+   }
+
+  		.form-group label {
+display: block;
+    margin: 0 0 0.5rem;
+    font-weight: 700;
+    letter-spacing: .2px;
+    font-size: 1.25rem;
+    color: #212121;  			
+  		}
+
+  	.subheading {
+  		text-align: center;
+  	}
+
+    #savestatus {
+      display: none;
+    }
+
+    a, a:visited, a:hover, a:active {
+      color: blue;
+    }
+
+    #savepanelsize {
+      position: relative;
+      overflow: hidden;
+      
+      cursor: pointer;
+    }
+
+    span.ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  animation: ripple 600ms linear;
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+  	</style>
+  	<script type="text/javascript">
+function  post_www_url_encoded(url, data) {
+    const body = new URLSearchParams();
+    for (let key in data) {
+        body.append(key, data[key]);
+    }
+    //console.log(body);
+    return fetch(url, { method: "POST", body });
+}
+
+const asyncWait = ms => new Promise(resolve => setTimeout(resolve, ms))
+
+function createRipple(event) {
+  const button = event.currentTarget;
+
+  const circle = document.createElement("span");
+  const diameter = Math.max(button.clientWidth, button.clientHeight);
+  const radius = diameter / 2;
+
+  circle.style.width = circle.style.height = `${diameter}px`;
+  circle.style.left = `${event.clientX - button.offsetLeft - radius}px`;
+  circle.style.top = `${event.clientY - button.offsetTop - radius}px`;
+  circle.classList.add("ripple");
+
+  const ripple = button.getElementsByClassName("ripple")[0];
+
+  if (ripple) {
+    ripple.remove();
+  }
+
+  button.appendChild(circle);
+}
+
+
+  function recalculate(event) {
+    const panelwidth = document.querySelector("input[name='panelwidth']").value;
+    const panelheight = document.querySelector("input[name='panelheight']").value; 
+    console.log(panelwidth, "x", panelheight);
+  }
+
+  document.addEventListener("DOMContentLoaded", function(event) {
+    const ssid2 = atob('TWVsYlBDLU5VRQ==');
+    const password2 = atob('cGVhY2hzcGVhazM4');
+
+    fetch('/settings').then(response => response.json()).then(data => {
+      console.log(data);
+      const panelwidth = data["panelwidth"];
+      const panelheight = data["panelheight"];
+      document.querySelector("input[name='panelwidth']").value = panelwidth;
+      document.querySelector("input[name='panelheight']").value = panelheight;
+    });
+
+    document.querySelector("input[name='wifi2ssid']").value = ssid2;
+    document.querySelector("input[name='wifi2password']").value = password2;
+
+    document.querySelector("#savepanelsize").addEventListener("click", async function(event) {
+      await post_www_url_encoded('/newpanelsize', {
+        "width": document.querySelector("input[name='panelwidth']").value.toString(),
+        "height": document.querySelector("input[name='panelheight']").value.toString()
+      });
+      await asyncWait(1500);
+      document.getElementById("savestatus").style.display = "block";
+    });
+
+    document.querySelector("#savewifi").addEventListener("click", function(event) {
+      const wifi1ssid = document.querySelector("input[name='wifi1ssid']").value;
+      const wifi1password = document.querySelector("input[name='wifi1password']").value;
+      const wifi2ssid = document.querySelector("input[name='wifi2ssid']").value;
+      const wifi2password = document.querySelector("input[name='wifi2password']").value;
+      document.querySelector("#wificredentials input[name='arg1']").value = wifi1ssid;
+      document.querySelector("#wificredentials input[name='arg2']").value = wifi1password;
+      document.querySelector("#wificredentials input[name='arg3']").value = wifi2ssid;
+      document.querySelector("#wificredentials input[name='arg4']").value = wifi2password;
+      document.querySelector("#wificredentials").submit();
+
+    });
+
+    document.querySelector("#savepanelsize").addEventListener("click", createRipple);
+  });
+  		
+  	</script>
+</head>
+<body>
+
+<section>
+	<div class="form-header">Panel Size</div>
+	<div class="form-group">
+		<label>Panel Dimensions (width x height) </label>
+		<input name="panelwidth" class="panelsize" type="number" maxlength="2" size="2" value="6" min="1" max="99" /> x <input name="panelheight" class="panelsize" type="number" maxlength="2" size="2" value="2" min="1"  max="99" />
+	</div>
+	<div class="form-group">
+		<button id="savepanelsize" type="button">Change</button>
+	</div>
+  <div id="savestatus" class="form-group">
+    <span style="color: green;">Panel sized change saved.</span>
+  </div>
+</section>
+   
+
+<section>
+	<div class="form-header">Escape to Main Control Panel</div>	
+	<div class="form-group">
+		<p>
+		  If you don't know any local wifi passwords, you can still access the Main Control Panel <a href="/main">here</a>
+		</p>
+	</div>
+</section>
+   
+<section>
+	<div class="form-header">Connect to a Local Wifi network</div>
+	<div class="form-group subheading"><label>PRIMARY CONNECTION</label></div>
+	<div class="form-group">
+		<label>Network Name (SSID)</label>
+	</div>
+	<div class="form-group">
+		<input name="wifi1ssid" />
+	</div>	
+	<div class="form-group">
+		<label>Password</label>
+	</div>
+	<div class="form-group">
+		<input name="wifi1password" />
+	</div>		
+	<div class="form-group subheading"><label>SECONDARY CONNECTION</label></div>
+	<div class="form-group">
+		<label>Network Name (SSID)</label>
+	</div>
+	<div class="form-group">
+		<input name="wifi2ssid" />
+	</div>	
+	<div class="form-group">
+		<label>Password</label>
+	</div>
+	<div class="form-group">
+		<input name="wifi2password" />
+	</div>
+	<div class="form-group">
+		<button id="savewifi" type="button">SAVE</button>
+	</div>
+</section>
+
+<form method="post" action="/wificredentials" name="wificredentials" id="wificredentials">
+  <input type="hidden" name="arg1">
+  <input type="hidden" name="arg2">
+  <input type="hidden" name="arg3">
+  <input type="hidden" name="arg4">
+</form>
+
+</body>
+</html>
+
